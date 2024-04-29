@@ -1,0 +1,30 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+			 xmlns:local="clr-namespace:VibrometerHostApp.Views"
+			 xmlns:viewModels="clr-namespace:VibrometerHostApp.Core.ViewModels;assembly=VibrometerHostApp.Core"
+			 xmlns:vm="using:VibrometerHostApp.ViewModels"
+             x:Class="VibrometerHostApp.Views.ConnectionView"
+			 x:DataType="vm:ConnectionViewModel">
+	<DockPanel Margin="20">
+		<DockPanel Margin="20" 
+				   DockPanel.Dock="Top"
+				   VerticalAlignment="Stretch">
+			<ComboBox SelectedIndex="0" 
+					  MaxDropDownHeight="300" 
+					  ItemsSource ="{Binding PortList}"
+					  DockPanel.Dock="Left"
+					  HorizontalAlignment="Stretch"/>
+			<Button Command="{Binding UpdateList}"
+					DockPanel.Dock="Left"
+					HorizontalAlignment="Stretch"
+					HorizontalContentAlignment="Center">Refresh List</Button>
+		</DockPanel>
+		<Button Command="{Binding Connect}"
+				DockPanel.Dock="Bottom"
+				HorizontalAlignment="Stretch"
+				HorizontalContentAlignment="Center">Connect</Button>
+	</DockPanel>
+</UserControl>
