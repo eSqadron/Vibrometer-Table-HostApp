@@ -3,8 +3,6 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-			 xmlns:local="clr-namespace:VibrometerHostApp.Views"
-			 xmlns:viewModels="clr-namespace:VibrometerHostApp.Core.ViewModels;assembly=VibrometerHostApp.Core"
 			 xmlns:vm="using:VibrometerHostApp.ViewModels"
              x:Class="VibrometerHostApp.Views.ConnectionView"
 			 x:DataType="vm:ConnectionViewModel">
@@ -15,6 +13,7 @@
 			<ComboBox SelectedIndex="0" 
 					  MaxDropDownHeight="300" 
 					  ItemsSource ="{Binding PortList}"
+					  SelectedItem ="{Binding SelectedPort}"
 					  DockPanel.Dock="Left"
 					  HorizontalAlignment="Stretch"/>
 			<Button Command="{Binding UpdateList}"
@@ -22,9 +21,18 @@
 					HorizontalAlignment="Stretch"
 					HorizontalContentAlignment="Center">Refresh List</Button>
 		</DockPanel>
-		<Button Command="{Binding Connect}"
-				DockPanel.Dock="Bottom"
-				HorizontalAlignment="Stretch"
-				HorizontalContentAlignment="Center">Connect</Button>
+		<DockPanel Margin="20" 
+				   DockPanel.Dock="Bottom"
+				   VerticalAlignment="Stretch">
+			<TextBlock Text="{Binding ReturnString}"
+					 DockPanel.Dock="Bottom"
+					 HorizontalAlignment="Stretch"/>
+			<Button Command="{Binding ConnectCommand}"
+					DockPanel.Dock="Bottom"
+					HorizontalAlignment="Stretch"
+					HorizontalContentAlignment="Center"
+					Content="Connect"/>
+		</DockPanel>
+		
 	</DockPanel>
 </UserControl>

@@ -1,0 +1,131 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+			 xmlns:local="clr-namespace:VibrometerHostApp.Views"
+			 xmlns:viewModels="clr-namespace:VibrometerHostApp.Core.ViewModels;assembly=VibrometerHostApp.Core"
+			 xmlns:vm="using:VibrometerHostApp.ViewModels"
+             x:Class="VibrometerHostApp.Views.ConfigureView"
+			 x:DataType="vm:ConfigureViewModel">
+	<DockPanel Margin="20">
+
+		<DockPanel DockPanel.Dock="Top" >
+			<Button Command="{Binding GoBackToConnectionCommand}"
+					DockPanel.Dock="Left"
+					HorizontalAlignment="Left"
+					HorizontalContentAlignment="Center"
+					Content="Go To Connection"/>
+
+			<Button Command="{Binding GoToManual}"
+					DockPanel.Dock="Right"
+					HorizontalAlignment="Right"
+					HorizontalContentAlignment="Center"
+					Content="Go To Manual Control"/>
+		</DockPanel>
+
+		<DockPanel Margin="20"
+				   DockPanel.Dock="Top"
+				   VerticalAlignment="Stretch">
+			<TextBlock DockPanel.Dock="Left"
+					   HorizontalAlignment="Stretch"
+					   VerticalAlignment="Center"
+					   Margin="5">Yaw Definition: </TextBlock>
+			<NumericUpDown DockPanel.Dock="Left"
+					 VerticalAlignment="Center"
+					 Margin="5"
+					 FormatString="0"
+					 Minimum="0" Maximum="1"
+					 Value="{Binding YawChannel}"
+					 Watermark="Channel"/>
+			<NumericUpDown DockPanel.Dock="Left"
+					 VerticalAlignment="Center"
+					 Margin="5"
+					 FormatString="0.00"
+					 Increment="0.05"
+					 Minimum="0" Maximum="360"
+					 Value="{Binding YawMin}"
+					 Watermark="Starting Degree"/>
+			<NumericUpDown DockPanel.Dock="Left"
+					 VerticalAlignment="Center"
+					 Margin="5"
+					 FormatString="0.00"
+					 Increment="0.05"
+					 Minimum="0" Maximum="360"
+					 Value="{Binding YawMax}"
+					 Watermark="End Degree"/>
+			<NumericUpDown DockPanel.Dock="Left"
+					 VerticalAlignment="Center"
+					 Margin="5"
+					 FormatString="0.00"
+					 Increment="0.05"
+					 Minimum="0" Maximum="360"
+					 Value="{Binding YawDelta}"
+					 Watermark="Delta Degree"/>
+			<Button DockPanel.Dock="Right"
+					HorizontalAlignment="Stretch"
+					HorizontalContentAlignment="Center"
+					VerticalAlignment="Center"
+					Command="{Binding DefineYawCommand}"
+					Margin="5">Define Yaw</Button>
+		</DockPanel>
+
+		<DockPanel Margin="20"
+				   DockPanel.Dock="Top"
+				   VerticalAlignment="Stretch">
+			<TextBlock DockPanel.Dock="Left"
+					   HorizontalAlignment="Stretch"
+					   VerticalAlignment="Center"
+					   Margin="5">Pitch Definition: </TextBlock>
+			<NumericUpDown DockPanel.Dock="Left"
+					 VerticalAlignment="Center"
+					 Margin="5"
+					 FormatString="0"
+					 Minimum="0" Maximum="1"
+					 Value="{Binding PitchChannel}"
+					 Watermark="Channel"/>
+			<NumericUpDown DockPanel.Dock="Left"
+					 VerticalAlignment="Center"
+					 Margin="5"
+					 FormatString="0.00"
+					 Increment="0.05"
+					 Minimum="0" Maximum="360"
+					 Value="{Binding PitchMin}"
+					 Watermark="Starting Degree"/>
+			<NumericUpDown DockPanel.Dock="Left"
+					 VerticalAlignment="Center"
+					 Margin="5"
+					 FormatString="0.00"
+					 Increment="0.05"
+					 Minimum="0" Maximum="360"
+					 Value="{Binding PitchMax}"
+					 Watermark="End Degree"/>
+			<NumericUpDown DockPanel.Dock="Left"
+					 VerticalAlignment="Center"
+					 Margin="5"
+					 FormatString="0.00"
+					 Increment="0.05"
+					 Minimum="0" Maximum="360"
+					 Value="{Binding PitchDelta}"
+					 Watermark="Delta Degree"/>
+			<Button DockPanel.Dock="Right"
+					HorizontalAlignment="Stretch"
+					HorizontalContentAlignment="Center"
+					VerticalAlignment="Center"
+					Command="{Binding DefinePitchCommand}"
+					Margin="5">Define Pitch</Button>
+		</DockPanel>
+
+		<TextBlock Text="{Binding ReturnString}"
+					 DockPanel.Dock="Bottom"
+					 HorizontalAlignment="Stretch"/>
+
+		<Button DockPanel.Dock="Bottom"
+					HorizontalAlignment="Stretch"
+					HorizontalContentAlignment="Center"
+					VerticalAlignment="Center"
+					Command="{Binding ReadyCommand}"
+					Margin="5">Ready Vibrometer</Button>
+		
+	</DockPanel>
+</UserControl>

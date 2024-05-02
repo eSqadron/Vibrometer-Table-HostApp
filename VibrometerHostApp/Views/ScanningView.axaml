@@ -1,0 +1,86 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+			 xmlns:vm="using:VibrometerHostApp.ViewModels"
+             x:Class="VibrometerHostApp.Views.ScanningView"
+			 x:DataType="vm:ScanningViewModel">
+	<DockPanel Margin="20" >
+			<DockPanel DockPanel.Dock="Top" >
+				<Button Command="{Binding GoBackToDefinitionCommand}"
+						DockPanel.Dock="Left"
+						HorizontalAlignment="Left"
+						HorizontalContentAlignment="Center"
+						Content="Go To Configuration"/>
+
+				<Button Command="{Binding GoToManual}"
+						DockPanel.Dock="Right"
+						HorizontalAlignment="Right"
+						HorizontalContentAlignment="Center"
+						Content="Go To Manual Control"/>
+			</DockPanel>
+
+			<DockPanel DockPanel.Dock="Bottom"
+					   HorizontalAlignment="Stretch">
+				<Button Command="{Binding StartScanCommand}"
+						DockPanel.Dock="Top"
+						HorizontalAlignment="Stretch"
+						HorizontalContentAlignment="Center"
+						Content="Start Scan"/>
+
+				<Grid ColumnDefinitions="200,*"
+					  RowDefinitions="auto,auto"
+					  DockPanel.Dock="Top"
+					  HorizontalAlignment="Stretch">
+
+					<Button Command="{Binding GetPointCommand}"
+						Grid.Row="0" Grid.Column="0"
+						HorizontalAlignment="Stretch"
+						HorizontalContentAlignment="Center"
+						Content="Get Point"/>
+
+					<TextBlock
+						 Grid.Row="1" Grid.Column="0"
+						 HorizontalAlignment="Stretch"
+						 Text="{Binding LastPoint}"/>
+
+					<Button Command="{Binding NextPointCommand}"
+						Grid.Row="0" Grid.Column="1"
+						Grid.RowSpan="2"
+						HorizontalAlignment="Stretch"
+						HorizontalContentAlignment="Center"
+						VerticalContentAlignment="Center"
+						Height="50"
+						Content="Next Point"/>
+
+				</Grid>
+
+				<Button Command="{Binding StopCommand}"
+						HorizontalAlignment="Stretch"
+						DockPanel.Dock="Top"
+						HorizontalContentAlignment="Center"
+						VerticalContentAlignment="Center"
+						Content="Stop Scan"/>
+
+				<Button Command="{Binding DumpPointsCommand}"
+						HorizontalAlignment="Stretch"
+						DockPanel.Dock="Top"
+						HorizontalContentAlignment="Center"
+						VerticalContentAlignment="Center"
+						Content="Dump Points"/>
+
+				<TextBlock HorizontalAlignment="Stretch"
+						DockPanel.Dock="Top"
+						Text="{Binding DumpedPoints}"/>
+
+				<Button Command="{Binding ResetCommand}"
+						HorizontalAlignment="Stretch"
+						DockPanel.Dock="Top"
+						HorizontalContentAlignment="Center"
+						VerticalContentAlignment="Center"
+						Content="Reset scanner in case pf error"/>
+
+			</DockPanel>
+		</DockPanel>
+</UserControl>
