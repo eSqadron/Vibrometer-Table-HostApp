@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO.Ports;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Text.RegularExpressions;
+
+using MeasurementPoint = (double yaw, double pitch);
 
 namespace VibrometerHostApp.Models
 {
@@ -35,6 +35,14 @@ namespace VibrometerHostApp.Models
             }
         }
 
+        public bool IsConnected
+        {
+            get
+            {
+                return _serialConnection?.IsOpen ?? false;
+            }
+        }
+
         static public List<string> GetPortNames() => SerialPort.GetPortNames().ToList();
 
         public void Connect()
@@ -47,7 +55,22 @@ namespace VibrometerHostApp.Models
             _serialConnection.ReadTimeout = 100;
             _serialConnection.WriteTimeout = 100;
 
-            _serialConnection.Open();
+            try {
+                _serialConnection.Open();
+            } catch(System.UnauthorizedAccessException e) {
+                throw new VibrometerException(e.Message);
+            }
+        }
+
+        public void Disconnect()
+        {
+            if(_serialConnection is null)
+            {
+                throw new VibrometerException("Closing unopened connection!");
+            }
+            _serialConnection.Close();
+            _serialConnection = null;
+            Port = "";
         }
 
         public string GetScanHelp()
@@ -68,77 +91,73 @@ namespace VibrometerHostApp.Models
 
         public string DefineYaw(ScannerChannelDefinition channelDef)
         {
-            if (channelDef.MinAngle is null || channelDef.MaxAngle is null || channelDef.AngleDelta is null)
+            if (channelDef.Channel is null || channelDef.MinAngle is null || channelDef.MaxAngle is null || channelDef.AngleDelta is null)
             {
-                throw new ArgumentException();
+                throw new VibrometerException("Some params for Yaw undefined!");
             }
 
-            var scan_ret = String.Empty;
-            _serialConnection?.WriteLine($"scan define yaw {channelDef.Channel} {(int)(channelDef.MinAngle * 100)} {(int)(channelDef.MaxAngle * 100)} {(int)(channelDef.AngleDelta * 100)}\r\n");
-            _serialConnection?.ReadLine();
-            scan_ret += _serialConnection?.ReadLine();
-
-            return scan_ret;
+            return standardWrite($"scan define yaw {channelDef.Channel} {(int)(channelDef.MinAngle * 100)} {(int)(channelDef.MaxAngle * 100)} {(int)(channelDef.AngleDelta * 100)}\r\n");
         }
 
         public string DefinePitch(ScannerChannelDefinition channelDef)
         {
-            if (channelDef.MinAngle is null || channelDef.MaxAngle is null || channelDef.AngleDelta is null)
+            if (channelDef.Channel is null || channelDef.MinAngle is null || channelDef.MaxAngle is null || channelDef.AngleDelta is null)
             {
-                throw new ArgumentException();
+                throw new VibrometerException("Some params for Pitch undefined!");
             }
 
-            var scan_ret = String.Empty;
-            _serialConnection?.WriteLine($"scan define pitch {channelDef.Channel} {(int)(channelDef.MinAngle * 100)} {(int)(channelDef.MaxAngle * 100)} {(int)(channelDef.AngleDelta * 100)}\r\n");
-            _serialConnection?.ReadLine();
-            scan_ret += _serialConnection?.ReadLine();
-
-            return scan_ret;
+            return standardWrite($"scan define pitch {channelDef.Channel} {(int)(channelDef.MinAngle * 100)} {(int)(channelDef.MaxAngle * 100)} {(int)(channelDef.AngleDelta * 100)}\r\n");
         }
 
         public string ReadyScanner()
         {
-            var scan_ret = String.Empty;
-            _serialConnection?.WriteLine($"scan ready\r\n");
-            _serialConnection?.ReadLine();
-            scan_ret += _serialConnection?.ReadLine();
-
-            return scan_ret;
+            return standardWrite($"scan ready\r\n");
         }
 
         public string StartScan()
         {
-            _serialConnection?.WriteLine($"scan start\r\n");
-            _serialConnection?.ReadLine();
-            return _serialConnection?.ReadLine() ?? throw new Exception();
+            return standardWrite($"scan start\r\n");
         }
 
         public string GoToNextPointScan()
         {
-            _serialConnection?.WriteLine($"scan next_point\r\n");
-            _serialConnection?.ReadLine();
-            return _serialConnection?.ReadLine() ?? throw new Exception();
+            return standardWrite($"scan next_point\r\n");
         }
 
-        public string GetPointScan()
+        public MeasurementPoint GetPointScan()
         {
-            _serialConnection?.WriteLine($"scan get_point\r\n");
-            _serialConnection?.ReadLine();
-            return _serialConnection?.ReadLine() ?? throw new Exception();
+            string raw_point = standardWrite($"scan get_point\r\n");
+
+            MatchCollection matchList = Regex.Matches(raw_point, @"[0-9]+");
+
+            if (matchList.Count() != 2)
+            {
+                throw new VibrometerException("There are more numbers than two in get poin response");
+            }
+
+            MeasurementPoint point;
+
+            point.yaw = Convert.ToDouble(matchList[0].ToString()) / 100;
+            point.pitch = Convert.ToDouble(matchList[1].ToString()) / 100;
+
+            return point;
+
         }
 
         public string StopScan()
         {
-            _serialConnection?.WriteLine($"scan stop\r\n");
-            _serialConnection?.ReadLine();
-            return _serialConnection?.ReadLine() ?? throw new Exception();
+            return standardWrite($"scan stop\r\n");
         }
 
-        public string ResetScan()
+        public string GetStatus()
         {
-            _serialConnection?.WriteLine($"scan reset\r\n");
-            _serialConnection?.ReadLine();
-            return _serialConnection?.ReadLine() ?? throw new Exception();
+            string raw_status = standardWrite($"scan status\r\n");
+
+            var prefix = "status: ";
+            int index = raw_status.IndexOf(prefix);
+            return ((index < 0)
+                    ? raw_status
+                    : raw_status.Remove(index, prefix.Length)).Trim();
         }
 
         public string DumpPointsFromScan()
@@ -156,6 +175,63 @@ namespace VibrometerHostApp.Models
             }
 
             return scan_dump;
+        }
+
+
+        public string SetPosition(Channel channel, double pos)
+        {
+            standardWrite($"mode pos\r\n");
+            standardWrite($"channel {(int)channel}\r\n");
+
+            return standardWrite($"pos {(int)(pos * 100)}\r\n");
+        }
+
+        public string GetPosition(Channel channel)
+        {
+            standardWrite($"channel {(int)channel}\r\n");
+            return standardWrite($"pos\r\n");
+        }
+
+        public string MotorStart(Channel channel)
+        {
+            standardWrite($"channel {(int)channel}\r\n");
+
+            return standardWrite($"motor start\r\n");
+        }
+
+        public string MotorStop(Channel channel)
+        {
+            standardWrite($"channel {(int)channel}\r\n");
+
+            return standardWrite($"motor stop\r\n");
+        }
+
+        public string MotorGetStatus(Channel channel)
+        {
+            standardWrite($"channel {(int)channel}\r\n");
+
+            return standardWrite($"motor\r\n");
+        }
+
+
+        private string standardWrite(string to_write)
+        {
+            if (_serialConnection is null)
+            {
+                throw new VibrometerException("Serial Connection is null!");
+            }
+
+            _serialConnection.WriteLine(to_write);
+
+            try
+            {
+                _serialConnection.ReadLine();
+                return _serialConnection.ReadLine();
+            }
+            catch (TimeoutException)
+            {
+                throw new VibrometerException("Couldn't read from Vibrometer - timeout!");
+            }
         }
 
     }

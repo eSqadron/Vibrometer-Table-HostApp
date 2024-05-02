@@ -13,7 +13,8 @@
 					DockPanel.Dock="Left"
 					HorizontalAlignment="Left"
 					HorizontalContentAlignment="Center"
-					Content="Go To Scanning"/>
+					Content="Go To Scanning"
+					IsEnabled="{Binding CanGoToScanning}"/>
 
 			<Button Command="{Binding GoToDefinition}"
 					DockPanel.Dock="Right"
@@ -21,6 +22,92 @@
 					HorizontalContentAlignment="Center"
 					Content="Go To Configuration"/>
 		</DockPanel>
+
+		<Grid DockPanel.Dock="Top"
+			  ColumnDefinitions="400,*"
+			  HorizontalAlignment="Stretch">
+			
+			<StackPanel DockPanel.Dock ="Left"
+						Margin="5"
+						Grid.Row="0" Grid.Column="0">
+				<TextBlock Text="Channel 0"/>
+
+				<Button Command="{Binding CH0StartMotor}"
+					HorizontalAlignment="Stretch"
+					HorizontalContentAlignment="Center"
+					Content="Motor Start"/>
+				<Button Command="{Binding CH0StopMotor}"
+					HorizontalAlignment="Stretch"
+					HorizontalContentAlignment="Center"
+					Content="Motor Stop"/>
+				<Button Command="{Binding CH0MotorGetStatus}"
+					HorizontalAlignment="Stretch"
+					HorizontalContentAlignment="Center"
+					Content="Get Status"/>
+				<TextBlock Text="{Binding CH0MotorStatus}"/>
+				
+				<NumericUpDown VerticalAlignment="Center"
+					 FormatString="0.00"
+					 Increment="0.05"
+					 Minimum="0" Maximum="360"
+					 Value="{Binding CH0SetPointValue}"
+					 Watermark="New Position"
+					 Margin="0,10,0,0"/>
+				<Button Command="{Binding CH0GoToPoint}"
+					HorizontalAlignment="Stretch"
+					HorizontalContentAlignment="Center"
+					Content="Go!"/>
+
+				<Button Command="{Binding CH0GetPoint}"
+					HorizontalAlignment="Stretch"
+					HorizontalContentAlignment="Center"
+					Content="Get Position"
+					Margin="0,10,0,0"/>
+				<TextBlock Text="{Binding CH0GetPointValue}"/>
+				
+
+			</StackPanel>
+
+			<StackPanel DockPanel.Dock ="Right"
+						Margin="5"
+						Grid.Row="0" Grid.Column="1">
+				<TextBlock Text="Channel 1"/>
+
+				<Button Command="{Binding CH1StartMotor}"
+					HorizontalAlignment="Stretch"
+					HorizontalContentAlignment="Center"
+					Content="Motor Start"/>
+				<Button Command="{Binding CH1StopMotor}"
+					HorizontalAlignment="Stretch"
+					HorizontalContentAlignment="Center"
+					Content="Motor Stop"/>
+				<Button Command="{Binding CH1MotorGetStatus}"
+					HorizontalAlignment="Stretch"
+					HorizontalContentAlignment="Center"
+					Content="Get Status"/>
+				<TextBlock Text="{Binding CH1MotorStatus}"/>
+				
+				<NumericUpDown VerticalAlignment="Center"
+					 FormatString="0.00"
+					 Increment="0.05"
+					 Minimum="0" Maximum="360"
+					 Value="{Binding CH1SetPointValue}"
+					 Watermark="New Position"
+					 Margin="0,10,0,0"/>
+				<Button Command="{Binding CH1GoToPoint}"
+					HorizontalAlignment="Stretch"
+					HorizontalContentAlignment="Center"
+					Content="Go!"/>
+
+				<Button Command="{Binding CH1GetPoint}"
+					HorizontalAlignment="Stretch"
+					HorizontalContentAlignment="Center"
+					Content="Get Position"
+					Margin="0,10,0,0"/>
+				<TextBlock Text="{Binding CH1GetPointValue}"/>
+			</StackPanel>
+			
+		</Grid>
 
 	</DockPanel>
 </UserControl>

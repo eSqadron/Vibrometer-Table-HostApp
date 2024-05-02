@@ -1,9 +1,9 @@
-﻿
-
-using ReactiveUI;
+﻿using ReactiveUI;
 using System;
 using System.Reactive;
 using VibrometerHostApp.Models;
+
+using MeasurementPoint = (double yaw, double pitch);
 
 namespace VibrometerHostApp.ViewModels
 {
@@ -16,7 +16,7 @@ namespace VibrometerHostApp.ViewModels
         public ReactiveCommand<Unit, Unit> NextPointCommand { get; }
         public ReactiveCommand<Unit, Unit> StopCommand { get; }
         public ReactiveCommand<Unit, Unit> DumpPointsCommand { get; }
-        public ReactiveCommand<Unit, Unit> ResetCommand { get; }
+        public ReactiveCommand<Unit, Unit> GetStatusCommand { get; }
 
         public string _lastPoint = String.Empty;
         public string LastPoint
@@ -32,6 +32,13 @@ namespace VibrometerHostApp.ViewModels
             private set => this.RaiseAndSetIfChanged(ref _dumpedPoints, value);
         }
 
+        public string _status = String.Empty;
+        public string Status
+        {
+            get => "Status: " + _status;
+            private set => this.RaiseAndSetIfChanged(ref _status, value);
+        }
+
         public ScanningViewModel(MainWindowViewModel parentRef)
         {
             GoBackToDefinitionCommand = ReactiveCommand.Create(() => { parentRef.MoveToDefinition(); });
@@ -40,10 +47,13 @@ namespace VibrometerHostApp.ViewModels
             StartScanCommand = ReactiveCommand.Create(() => { VibrometerConnection.Instance.StartScan(); });
 
             NextPointCommand = ReactiveCommand.Create(() => { VibrometerConnection.Instance.GoToNextPointScan(); });
-            GetPointCommand = ReactiveCommand.Create(() => { LastPoint = VibrometerConnection.Instance.GetPointScan(); });
+            GetPointCommand = ReactiveCommand.Create(() => {
+                MeasurementPoint point = VibrometerConnection.Instance.GetPointScan();
+                LastPoint = $"Yaw: {point.yaw}, Pitch: {point.pitch}";
+            });
 
             StopCommand = ReactiveCommand.Create( () => { VibrometerConnection.Instance.StopScan(); });
-            ResetCommand = ReactiveCommand.Create(() => { VibrometerConnection.Instance.ResetScan(); });
+            GetStatusCommand = ReactiveCommand.Create(() => { Status = VibrometerConnection.Instance.GetStatus(); });
 
             DumpPointsCommand = ReactiveCommand.Create(() => { DumpedPoints = VibrometerConnection.Instance.DumpPointsFromScan(); });
         }

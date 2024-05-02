@@ -56,12 +56,30 @@
 
 				</Grid>
 
+				
+
 				<Button Command="{Binding StopCommand}"
 						HorizontalAlignment="Stretch"
 						DockPanel.Dock="Top"
 						HorizontalContentAlignment="Center"
 						VerticalContentAlignment="Center"
 						Content="Stop Scan"/>
+
+				<DockPanel DockPanel.Dock="Top"
+					   HorizontalAlignment="Stretch">
+					
+					<Button Command="{Binding GetStatusCommand}"
+						DockPanel.Dock="Left"
+						HorizontalAlignment="Stretch"
+						HorizontalContentAlignment="Center"
+						Content="Get Status"/>
+
+					<TextBlock HorizontalAlignment="Center"
+							   VerticalAlignment="Center"
+							   DockPanel.Dock="Right"
+							   Text="{Binding Status}"/>
+
+				</DockPanel>
 
 				<Button Command="{Binding DumpPointsCommand}"
 						HorizontalAlignment="Stretch"
@@ -73,13 +91,6 @@
 				<TextBlock HorizontalAlignment="Stretch"
 						DockPanel.Dock="Top"
 						Text="{Binding DumpedPoints}"/>
-
-				<Button Command="{Binding ResetCommand}"
-						HorizontalAlignment="Stretch"
-						DockPanel.Dock="Top"
-						HorizontalContentAlignment="Center"
-						VerticalContentAlignment="Center"
-						Content="Reset scanner in case pf error"/>
 
 			</DockPanel>
 		</DockPanel>

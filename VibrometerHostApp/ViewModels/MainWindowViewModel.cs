@@ -1,4 +1,5 @@
 ﻿using ReactiveUI;
+using System;
 using System.Reactive.Linq;
 using VibrometerHostApp.Models;
 using VibrometerHostApp.Views;
@@ -12,10 +13,10 @@ namespace VibrometerHostApp.ViewModels
         public ScanningViewModel ScanView;
         public ManualControlViewModel ManualView;
 
-        public ViewModelBase _contentViewModel;
+        public ViewModelBase? _contentViewModel = null;
         public ViewModelBase ContentViewModel
         {
-            get => _contentViewModel;
+            get => _contentViewModel ?? throw new Exception("Empty Main screen");
             private set => this.RaiseAndSetIfChanged(ref _contentViewModel, value);
         }
 
@@ -28,18 +29,36 @@ namespace VibrometerHostApp.ViewModels
             ScanView = new ScanningViewModel(this);
             ManualView = new ManualControlViewModel(this);
 
-            ContentViewModel = ScanView;
+            ContentViewModel = ConnView;
         }
 
-        public string Connect(string port)
+        public void Connect(string port)
         {
             var _connection = VibrometerConnection.Instance;
+
+            if (_connection.IsConnected)
+            {
+                if(_connection.Port == port)
+                {
+                    ContentViewModel = ConfView;
+                    return;
+                }
+                else
+                {
+                    _connection.Disconnect();
+                }
+            }
+
             _connection.Port = port;
             _connection.Connect();
 
-            ContentViewModel = ConfView;
+            if (!_connection.GetScanHelp().Contains("Subcommands"))
+            {
+                _connection.Disconnect();
+                throw new VibrometerException("This isn't Vibrometer Controller!");
+            }
 
-            return _connection.GetScanHelp();
+            ContentViewModel = ConfView;
         }
 
         public void MoveToScanning()
@@ -54,7 +73,8 @@ namespace VibrometerHostApp.ViewModels
 
         public void MoveToManualControl()
         {
-            ContentViewModel = ManualView;
+            ManualView.CheckScanning();
+            ContentViewModel = ManualView;           
         }
 
         public void MoveToConnectionControl()

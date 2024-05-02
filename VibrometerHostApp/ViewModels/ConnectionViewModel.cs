@@ -14,7 +14,7 @@ namespace VibrometerHostApp.ViewModels
         {
             PortList = new ObservableCollection<string>();
 
-            ConnectCommand = ReactiveCommand.Create(() => { ReturnString = parentRef.Connect(SelectedPort); });
+            ConnectCommand = ReactiveCommand.Create(() => { try { parentRef.Connect(SelectedPort); } catch (VibrometerException e) { ReturnString = e.Message;  } });
         }
 
         public ObservableCollection<string> PortList {  get; }
