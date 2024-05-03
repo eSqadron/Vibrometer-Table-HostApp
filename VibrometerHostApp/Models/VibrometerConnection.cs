@@ -186,10 +186,19 @@ namespace VibrometerHostApp.Models
             return standardWrite($"pos {(int)(pos * 100)}\r\n");
         }
 
-        public string GetPosition(Channel channel)
+        public double GetPosition(Channel channel)
         {
             standardWrite($"channel {(int)channel}\r\n");
-            return standardWrite($"pos\r\n");
+            string raw_pos = standardWrite($"pos\r\n");
+
+            MatchCollection matchList = Regex.Matches(raw_pos, @"[0-9]+");
+
+            if (matchList.Count() != 1)
+            {
+                throw new VibrometerException("There are more numbers than one in get poin response");
+            }
+
+            return Convert.ToDouble(matchList[0].ToString()) / 100;
         }
 
         public string MotorStart(Channel channel)

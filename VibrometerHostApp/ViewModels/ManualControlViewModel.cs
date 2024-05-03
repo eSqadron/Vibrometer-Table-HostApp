@@ -79,8 +79,8 @@ namespace VibrometerHostApp.ViewModels
             CH0GoToPoint = ReactiveCommand.Create(() => { v_conn.SetPosition(Channel.CH0, CH0SetPointValue ?? throw new Exception()); });
             CH1GoToPoint = ReactiveCommand.Create(() => { v_conn.SetPosition(Channel.CH1, CH1SetPointValue ?? throw new Exception()); });
 
-            CH0GetPoint = ReactiveCommand.Create(() => { CH0GetPointValue = v_conn.GetPosition(Channel.CH0); });
-            CH1GetPoint = ReactiveCommand.Create(() => { CH1GetPointValue = v_conn.GetPosition(Channel.CH1); });
+            CH0GetPoint = ReactiveCommand.Create(() => { CH0GetPointValue = $"Position: {v_conn.GetPosition(Channel.CH0)}"; });
+            CH1GetPoint = ReactiveCommand.Create(() => { CH1GetPointValue = $"Position: {v_conn.GetPosition(Channel.CH1)}"; });
 
             CH0StartMotor = ReactiveCommand.Create(() => { v_conn.MotorStart(Channel.CH0); });
             CH1StartMotor = ReactiveCommand.Create(() => { v_conn.MotorStart(Channel.CH1); });
