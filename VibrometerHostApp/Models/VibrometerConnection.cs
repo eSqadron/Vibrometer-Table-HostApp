@@ -10,6 +10,8 @@ namespace VibrometerHostApp.Models
 {
     public class VibrometerConnection
     {
+        public bool PWMconnectedBUG { set; get; } = true;
+
         public string? Port {  get; set; }
 
         private SerialPort? _serialConnection;
@@ -18,7 +20,7 @@ namespace VibrometerHostApp.Models
         }
 
         private static VibrometerConnection? instance = null;
-        private static readonly object padlock = new object();
+        private static readonly object padlock = new();
 
         public static VibrometerConnection Instance
         {
@@ -26,10 +28,7 @@ namespace VibrometerHostApp.Models
             {
                 lock (padlock)
                 {
-                    if (instance == null)
-                    {
-                        instance = new VibrometerConnection();
-                    }
+                    instance ??= new VibrometerConnection();
                     return instance;
                 }
             }
@@ -47,13 +46,15 @@ namespace VibrometerHostApp.Models
 
         public void Connect()
         {
-            _serialConnection = new SerialPort(Port);
+            _serialConnection = new SerialPort(Port)
+            {
+                BaudRate = 9600,
+                RtsEnable = true,
+                DtrEnable = true,
+                ReadTimeout = 100,
+                WriteTimeout = 10
+            };
 
-            _serialConnection.BaudRate = 9600;
-            _serialConnection.RtsEnable = true;
-            _serialConnection.DtrEnable = true;
-            _serialConnection.ReadTimeout = 100;
-            _serialConnection.WriteTimeout = 100;
 
             try {
                 _serialConnection.Open();
@@ -96,7 +97,7 @@ namespace VibrometerHostApp.Models
                 throw new VibrometerException("Some params for Yaw undefined!");
             }
 
-            return standardWrite($"scan define yaw {channelDef.Channel} {(int)(channelDef.MinAngle * 100)} {(int)(channelDef.MaxAngle * 100)} {(int)(channelDef.AngleDelta * 100)}\r\n");
+            return StandardWrite($"scan define yaw {channelDef.Channel} {(int)(channelDef.MinAngle * 100)} {(int)(channelDef.MaxAngle * 100)} {(int)(channelDef.AngleDelta * 100)}\r\n");
         }
 
         public string DefinePitch(ScannerChannelDefinition channelDef)
@@ -106,31 +107,31 @@ namespace VibrometerHostApp.Models
                 throw new VibrometerException("Some params for Pitch undefined!");
             }
 
-            return standardWrite($"scan define pitch {channelDef.Channel} {(int)(channelDef.MinAngle * 100)} {(int)(channelDef.MaxAngle * 100)} {(int)(channelDef.AngleDelta * 100)}\r\n");
+            return StandardWrite($"scan define pitch {channelDef.Channel} {(int)(channelDef.MinAngle * 100)} {(int)(channelDef.MaxAngle * 100)} {(int)(channelDef.AngleDelta * 100)}\r\n");
         }
 
         public string ReadyScanner()
         {
-            return standardWrite($"scan ready\r\n");
+            return StandardWrite($"scan ready\r\n");
         }
 
         public string StartScan()
         {
-            return standardWrite($"scan start\r\n");
+            return StandardWrite($"scan start\r\n");
         }
 
         public string GoToNextPointScan()
         {
-            return standardWrite($"scan next_point\r\n");
+            return StandardWrite($"scan next_point\r\n");
         }
 
         public MeasurementPoint GetPointScan()
         {
-            string raw_point = standardWrite($"scan get_point\r\n");
+            string raw_point = StandardWrite($"scan get_point\r\n");
 
             MatchCollection matchList = Regex.Matches(raw_point, @"[0-9]+");
 
-            if (matchList.Count() != 2)
+            if (matchList.Count != 2)
             {
                 throw new VibrometerException("There are more numbers than two in get poin response");
             }
@@ -146,12 +147,12 @@ namespace VibrometerHostApp.Models
 
         public string StopScan()
         {
-            return standardWrite($"scan stop\r\n");
+            return StandardWrite($"scan stop\r\n");
         }
 
         public string GetStatus()
         {
-            string raw_status = standardWrite($"scan status\r\n");
+            string raw_status = StandardWrite($"scan status\r\n");
 
             var prefix = "status: ";
             int index = raw_status.IndexOf(prefix);
@@ -180,20 +181,20 @@ namespace VibrometerHostApp.Models
 
         public string SetPosition(Channel channel, double pos)
         {
-            standardWrite($"mode pos\r\n");
-            standardWrite($"channel {(int)channel}\r\n");
+            StandardWrite($"mode pos\r\n");
+            StandardWrite($"channel {(int)channel}\r\n");
 
-            return standardWrite($"pos {(int)(pos * 100)}\r\n");
+            return StandardWrite($"pos {(int)(pos * 100)}\r\n");
         }
 
         public double GetPosition(Channel channel)
         {
-            standardWrite($"channel {(int)channel}\r\n");
-            string raw_pos = standardWrite($"pos\r\n");
+            StandardWrite($"channel {(int)channel}\r\n");
+            string raw_pos = StandardWrite($"pos\r\n");
 
             MatchCollection matchList = Regex.Matches(raw_pos, @"[0-9]+");
 
-            if (matchList.Count() != 1)
+            if (matchList.Count != 1)
             {
                 throw new VibrometerException("There are more numbers than one in get poin response");
             }
@@ -201,29 +202,59 @@ namespace VibrometerHostApp.Models
             return Convert.ToDouble(matchList[0].ToString()) / 100;
         }
 
+        public string ZeroPosition(Channel channel)
+        {
+            StandardWrite($"channel {(int)channel}\r\n");
+            return StandardWrite($"pos zero\r\n");
+        }
+
+        private Channel GetOtherChannel(Channel chnl)
+        {
+            if (chnl == Channel.CH0) return Channel.CH1;
+            else return Channel.CH0;
+        }
+
         public string MotorStart(Channel channel)
         {
-            standardWrite($"channel {(int)channel}\r\n");
+            if (PWMconnectedBUG)
+            {
+                if(MotorGetStatus(GetOtherChannel(channel)))
+                {
+                    throw new VibrometerException("it is illegal to start other motor when first is started when there is PWM hardware bug!");
+                }
+            }
 
-            return standardWrite($"motor start\r\n");
+            StandardWrite($"channel {(int)channel}\r\n");
+
+            return StandardWrite($"motor start\r\n");
         }
 
         public string MotorStop(Channel channel)
         {
-            standardWrite($"channel {(int)channel}\r\n");
+            StandardWrite($"channel {(int)channel}\r\n");
 
-            return standardWrite($"motor stop\r\n");
+            return StandardWrite($"motor stop\r\n");
         }
 
-        public string MotorGetStatus(Channel channel)
+        public bool MotorGetStatus(Channel channel)
         {
-            standardWrite($"channel {(int)channel}\r\n");
+            StandardWrite($"channel {(int)channel}\r\n");
+            string raw_status = StandardWrite($"motor\r\n");
 
-            return standardWrite($"motor\r\n");
+            MatchCollection matchList = Regex.Matches(raw_status, @"on|off!");
+
+            if (matchList.Count != 1)
+            {
+                throw new VibrometerException("There are more on/off than one in get motor status response");
+            }
+
+
+
+            return matchList[0].ToString() == "on";
         }
 
 
-        private string standardWrite(string to_write)
+        private string StandardWrite(string to_write)
         {
             if (_serialConnection is null)
             {

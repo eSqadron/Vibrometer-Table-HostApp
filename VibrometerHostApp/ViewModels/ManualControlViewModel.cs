@@ -29,6 +29,9 @@ namespace VibrometerHostApp.ViewModels
         public ReactiveCommand<Unit, Unit> CH0MotorGetStatus { get; }
         public ReactiveCommand<Unit, Unit> CH1MotorGetStatus { get; }
 
+        public ReactiveCommand<Unit, Unit> CH0ZeroPos { get; }
+        public ReactiveCommand<Unit, Unit> CH1ZeroPos { get; }
+
         public double? CH0SetPointValue { set; get; }
         public double? CH1SetPointValue { set; get; }
 
@@ -82,14 +85,61 @@ namespace VibrometerHostApp.ViewModels
             CH0GetPoint = ReactiveCommand.Create(() => { CH0GetPointValue = $"Position: {v_conn.GetPosition(Channel.CH0)}"; });
             CH1GetPoint = ReactiveCommand.Create(() => { CH1GetPointValue = $"Position: {v_conn.GetPosition(Channel.CH1)}"; });
 
-            CH0StartMotor = ReactiveCommand.Create(() => { v_conn.MotorStart(Channel.CH0); });
-            CH1StartMotor = ReactiveCommand.Create(() => { v_conn.MotorStart(Channel.CH1); });
+            CH0StartMotor = ReactiveCommand.Create(() => { CH0MotorStatus = StartMotorWrapper(Channel.CH0); });
+            CH1StartMotor = ReactiveCommand.Create(() => { CH1MotorStatus = StartMotorWrapper(Channel.CH1); });
 
-            CH0StopMotor = ReactiveCommand.Create(() => { v_conn.MotorStop(Channel.CH0); });
-            CH1StopMotor = ReactiveCommand.Create(() => { v_conn.MotorStop(Channel.CH1); });
+            CH0StopMotor = ReactiveCommand.Create(() => { CH0MotorStatus = StopMotorWrapper(Channel.CH0); });
+            CH1StopMotor = ReactiveCommand.Create(() => { CH1MotorStatus = StopMotorWrapper(Channel.CH1); });
 
-            CH0MotorGetStatus = ReactiveCommand.Create(() => { CH0MotorStatus = v_conn.MotorGetStatus(Channel.CH0); });
-            CH1MotorGetStatus = ReactiveCommand.Create(() => { CH1MotorStatus = v_conn.MotorGetStatus(Channel.CH1); });
+            CH0MotorGetStatus = ReactiveCommand.Create(() => { CH0MotorStatus = GetMotorStatusAsString(Channel.CH0); });
+            CH1MotorGetStatus = ReactiveCommand.Create(() => { CH1MotorStatus = GetMotorStatusAsString(Channel.CH1); });
+
+            CH0ZeroPos = ReactiveCommand.Create(() => { v_conn.ZeroPosition(Channel.CH0); });
+            CH1ZeroPos = ReactiveCommand.Create(() => { v_conn.ZeroPosition(Channel.CH1); });
+        }
+
+        private string StopMotorWrapper(Channel chnl)
+        {
+            VibrometerConnection v_conn = VibrometerConnection.Instance;
+            try
+            {
+                v_conn.MotorStop(chnl);
+            }
+            catch (VibrometerException e)
+            {
+                return e.Message;
+            }
+
+            return GetMotorStatusAsString(chnl);
+        }
+
+        private string StartMotorWrapper(Channel chnl)
+        {
+            VibrometerConnection v_conn = VibrometerConnection.Instance;
+            try
+            {
+                v_conn.MotorStart(chnl); 
+            }
+            catch (VibrometerException e)
+            {
+                return e.Message;
+            }
+
+            return GetMotorStatusAsString(chnl);
+        }
+
+        private string GetMotorStatusAsString(Channel chnl)
+        {
+            VibrometerConnection v_conn = VibrometerConnection.Instance;
+
+            try
+            {
+                return $"Motor on channel {chnl} is {(v_conn.MotorGetStatus(chnl) ? "on" : "off")}";
+            }
+            catch (VibrometerException e) 
+            {
+                return e.Message;
+            }
         }
 
         public void CheckScanning()

@@ -32,8 +32,6 @@ namespace VibrometerHostApp.ViewModels
         public double? PitchMax { set; get; } = null;
         public double? PitchDelta { set; get; } = null;
 
-        private VibrometerConnection? _connection;
-
         private string _returnString = String.Empty;
         public string ReturnString
         {
@@ -49,7 +47,7 @@ namespace VibrometerHostApp.ViewModels
             //    Pitch = new ScannerChannelDefinition() { Channel = 1 },
             //};
 
-            _connection = VibrometerConnection.Instance;
+            VibrometerConnection _connection = VibrometerConnection.Instance;
 
             DefineYawCommand = ReactiveCommand.Create(() => { try { ReturnString = _connection.DefineYaw(new ScannerChannelDefinition(YawChannel, YawMin, YawMax, YawDelta)); } catch (Exception) { ReturnString = "Define All Fields!"; } });
             DefinePitchCommand = ReactiveCommand.Create(() => { try { ReturnString = _connection.DefinePitch(new ScannerChannelDefinition(PitchChannel, PitchMin, PitchMax, PitchDelta)); } catch (Exception) { ReturnString = "Define All Fields!"; } });

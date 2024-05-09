@@ -20,8 +20,6 @@ namespace VibrometerHostApp.ViewModels
             private set => this.RaiseAndSetIfChanged(ref _contentViewModel, value);
         }
 
-        private VibrometerConnection? _connection;
-
         public MainWindowViewModel()
         {
             ConnView = new ConnectionViewModel(this);
